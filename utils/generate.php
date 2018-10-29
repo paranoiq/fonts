@@ -1,11 +1,6 @@
 <?php declare(strict_types = 1);
 
-if (empty($argv[1])) {
-    echo "usage:\n";
-    echo "`php generate.php variant input/file/path.paf`\n";
-}
-
-$replacements = [
+$variants = [
     'rounded' => [
         '┌' => '╭',
         '┐' => '╮',
@@ -83,13 +78,16 @@ $replacements = [
     ],
 ];
 
-$variant = $argv[1];
-$path = $argv[2];
+$baseDir = dirname(__DIR__) . '/fonts';
 
-// foo.paf -> foo-variant.paf
-$input = file_get_contents($path);
-$output = str_replace(array_keys($replacements[$variant]), array_values($replacements[$variant]), $input);
-file_put_contents(
-    sprintf('%s-%s.paf', substr($path, 0, -4), $variant),
-    $output
-);
+foreach ($variants as $variant => $replacements) {
+    foreach (['', '-small', '-slim', '-slim-small'] as $version) {
+        echo sprintf('midnight-%s/midnight%s-%s.paf', $variant, $version, $variant) . "\n";
+        $input = file_get_contents(sprintf('%s/midnight/midnight%s.paf', $baseDir, $version));
+        $output = str_replace(array_keys($replacements), array_values($replacements), $input);
+        file_put_contents(
+            sprintf('%s/midnight-%s/midnight%s-%s.paf', $baseDir, $variant, $version, $variant),
+            $output
+        );
+    }
+}
